@@ -31,7 +31,7 @@ exports.emailMessage = functions.https.onRequest((req, res) => {
       <p>${summary || ''}</p>
     </div>`;
       var sesAccessKey = 'eneamunwe@gmail.com';
-      var sesSecretKey = 'ENEA@flashde123';
+      var sesSecretKey = '********';
 
       var transporter = nodemailer.createTransport(
         smtpTransport({

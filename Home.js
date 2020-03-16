@@ -1,7 +1,7 @@
 
 import React,{ useState, useEffect } from 'react';
 import {  SafeAreaView, StyleSheet, ScrollView,
-  View,Text, TextInput,  StatusBar, Button} from 'react-native';
+  View,Text, TextInput,  StatusBar, Button, ActivityIndicator} from 'react-native';
   import auth from '@react-native-firebase/auth'
   import functions from '@react-native-firebase/functions';
  
@@ -9,19 +9,16 @@ import {  SafeAreaView, StyleSheet, ScrollView,
 import {  Colors} from 'react-native/Libraries/NewAppScreen';
  const Home = ({navigation}) => {
      const [user, setUser] = useState({currentUser: null})
-    const [state, setState] = useState({  
-        errorMessage: null,
-                firstname: '',
-                lastname:'',
-                dateofbirth: '',
-                summary: ''
-              })
-    const [options, setOptions]= useState({firstName: '',
-    lastName:'',
-    dateOfBirth: '',
-    summary: '',
-    email:'eneamunwe@yahoo.com'})
-   
+     const [isLoading, setIsLoading] = useState(false)
+    const [errorMessage, setErroMessage] = useState(null)
+    const [firstname, setFirstName]= useState('')
+    const [lastname, setLastname]= useState( '')
+    const [dateofbirth, setDateOfBirth]= useState( '')
+    const [summary, setSummary]= useState('')
+    const [name, setName]= useState( '')
+    const [email, setEmail]= useState('')
+    
+    
     useEffect( () => {
         const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
         
@@ -34,23 +31,75 @@ import {  Colors} from 'react-native/Libraries/NewAppScreen';
               }
               onAuthStateChanged = (user) => {
                setUser({currentUser:user})
+               if(user){
+               setName(`${user.displayName}`)
+               setEmail(`${user.email}`)}
+              
                 navigation.navigate(user ? 'Home' : 'SignIn')
+              }
+              const sendMail2 = () =>{
+                fetch('https://us-central1-test-app-7aa0e.cloudfunctions.net/emailMessage', {
+                    method: 'POST', // or 'PUT'
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({firstname,
+                      lastname,
+                      dateofbirth,
+                      summary,
+                      email:'eneamunwe@gmail.com'}),
+                  })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setErroMessage( data.message);
+                      setIsLoading(false)
+                  })
+                  .catch((e) => {
+                    setIsLoading(false)
+                    setErroMessage( `${e}`);
+                  });
+              }
+              const sendMail = ()=>{ 
+                setIsLoading(true)
+                fetch('https://us-central1-test-app-7aa0e.cloudfunctions.net/emailMessage', {
+                      method: 'post',
+                      body: JSON.stringify({firstname,
+                        lastname,
+                        dateofbirth,
+                        summary,
+                        email:"eneamunwe@gmail.com"})
+                    }).then(function(response) {
+                      return response.json();
+                    }).then(function(data) {
+                      setErroMessage( data.message);
+                      setIsLoading(false)
+                    }).catch(e => {
+                      setIsLoading(false)
+                      setErroMessage( `${e}`);
+                    })
               }
              const submit = async () =>{
             //   async function sendEmail() {
+                setIsLoading(true)
                 try {
                   const success = await functions().httpsCallable('emailMessage')({
-                    ...options
+                    firstname,
+                    lastname,
+                    dateofbirth,
+                    summary,
+                    email:"eneamunwe@gmail.com"
                   });
                
                   if (success) {
-                    setState({errorMessage: 'Email send successfully'});
+                    setErroMessage( 'Email send successfully');
+                    setIsLoading(false)
                   } else {
                     console.warn('Woops, looks like something went wrong!');
                   }
-                  navigation.navigate('SignIn')
+                  
                 } catch (e) {
-                    setState({errorMessage: `Error: ${e}`});
+                    setIsLoading(false)
+                    setErroMessage( `${e}`);
                 }
               }
     return(
@@ -58,7 +107,18 @@ import {  Colors} from 'react-native/Libraries/NewAppScreen';
  <ScrollView
      contentInsetAdjustmentBehavior="automatic"
      style={styles.scrollView}>
-     
+       <View style={styles.sectionContainer}> 
+    <Text style={styles.sectionTitle}>{name}</Text>
+     <Text >{`${email}`}</Text>
+   </View>
+     <View style={styles.sectionContainer}>
+      
+      {isLoading && <ActivityIndicator size="large" color="#0000ff" />}
+      {errorMessage && !isLoading &&
+        <Text style={{ color: 'red' }}>
+          {errorMessage}
+        </Text>}</View>
+
      <View style={styles.body}>
      <View style={styles.sectionContainer}>
      <Text style={styles.sectionTitle}>First Name</Text>
@@ -66,8 +126,8 @@ import {  Colors} from 'react-native/Libraries/NewAppScreen';
            
            autoCapitalize="none"
            placeholder="First Name"
-           onChangeText={firstname => setState({ firstname })}
-          value={state.firstname}
+           onChangeText={firstname => setFirstName(firstname )}
+          value={firstname}
          />
          
    </View>
@@ -77,8 +137,8 @@ import {  Colors} from 'react-native/Libraries/NewAppScreen';
            
            autoCapitalize="none"
            placeholder="Last Name"
-           onChangeText={lastname => setState({ lastname })}
-          value={state.lastname}
+           onChangeText={lastname => setLastname( lastname )}
+          value={lastname}
          />
         
    </View>
@@ -88,8 +148,8 @@ import {  Colors} from 'react-native/Libraries/NewAppScreen';
            
            autoCapitalize="none"
            placeholder="Date of Birthdateofbirth" 
-           onChangeText={dateofbirth => setState({ dateofbirth })}
-          value={state.dateofbirth} 
+           onChangeText={dateofbirth => setDateOfBirth(dateofbirth )}
+          value={dateofbirth} 
          />
    </View>
    <View style={styles.sectionContainer}>
@@ -97,16 +157,16 @@ import {  Colors} from 'react-native/Libraries/NewAppScreen';
      <TextInput
            firstname
            autoCapitalize="none"
-           placeholder="Password"
-           onChangeText={summary => setState({summary })}
-          value={state.summary}
+           placeholder="Summary"
+           onChangeText={summary => setSummary(summary)}
+          value={summary}
          />
         
    </View>
    <View style={styles.sectionContainer}>
          <Button
          title="Send Via Email"
-         onPress={ submit}
+         onPress={ sendMail2}
        />
    </View><View style={styles.sectionContainer}>
    {user != null  &&

@@ -29,7 +29,7 @@ const App: () => React$Node = () => {
   
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="SignIn">
         <Stack.Screen name="SignIn" options={{title:'Sign In'}} component={SignIn} />
         <Stack.Screen name="Home" options={{title:'Send Email'}} component={Home} />
         <Stack.Screen name="SignUp" options={{title:'Sign Up'}} component={SignUp} />

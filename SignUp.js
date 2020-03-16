@@ -10,8 +10,16 @@ export default class SignUp extends React.Component {
   state = { email: '', password: '', errorMessage: null,isLoading:false }
 
   handleSignUp = () => {
+<<<<<<< Updated upstream
     this.setState({isLoading: true})
     const { email, password } = this.state
+=======
+
+    
+    const { email, password } = this.state
+    if(!email && !password){this.setState({ errorMessage: 'Email or Pasword field is empty' })}else{
+    this.setState({isLoading: true})
+>>>>>>> Stashed changes
     firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
@@ -23,11 +31,19 @@ export default class SignUp extends React.Component {
       this.setState({isLoading: false})
     })
   }
+<<<<<<< Updated upstream
+=======
+  }
+>>>>>>> Stashed changes
   handleGoogleSignIn = async () => {
     
     await GoogleSignin.configure({
       scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+<<<<<<< Updated upstream
       webClientId: '1045040137199-32lcncjerd4cttr9d9hbkq5m99qfi7hb.apps.googleusercontent.com', // required
+=======
+      webClientId: '1045040137199-hktsot474fqlafsa7jje7d1k84nkdq44.apps.googleusercontent.com' // required
+>>>>>>> Stashed changes
     });
     const { accessToken, idToken } = await GoogleSignin.signIn();
     const credential = firebase.auth.GoogleAuthProvider.credential(idToken, accessToken);
@@ -80,12 +96,21 @@ export default class SignUp extends React.Component {
           onPress={this.handleFacebookSignIn}
           />
           </View>
+<<<<<<< Updated upstream
         </View><Text style={styles.center}>or</Text>
+=======
+        </View><View style={styles.sectionContainer}>
+        <Text style={styles.center}>or</Text>
+>>>>>>> Stashed changes
         {this.state.isLoading && <ActivityIndicator size="large" color="#0000ff" />}
         {this.state.errorMessage && !this.state.isLoading &&
           <Text style={{ color: 'red' }}>
             {this.state.errorMessage}
+<<<<<<< Updated upstream
           </Text>}
+=======
+          </Text>}</View>
+>>>>>>> Stashed changes
           <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Email</Text>
         <TextInput
